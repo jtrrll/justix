@@ -30,7 +30,7 @@
           justfile = lib.mkOption {
             default = { };
             description = "The justfile to use";
-            type = lib.types.either lib.types.path lib.types.attrs;
+            type = lib.types.either lib.types.path (lib.types.attrsOf lib.types.anything);
           };
         };
 
