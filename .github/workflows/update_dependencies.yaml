@@ -1,0 +1,25 @@
+name: Update Dependencies
+on:
+  schedule:
+    - cron: "0 22 * * FRI"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  nix-flake:
+    name: Update Nix flake dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v21
+      - uses: DeterminateSystems/magic-nix-cache-action@v13
+      - name: Update flake.lock
+        uses: DeterminateSystems/update-flake-lock@v28
+        with:
+          pr-title: "deps: update Nix flake dependencies"
+          pr-labels: |
+            automated
+            dependencies
+            nix
+          token: ${{ secrets.PR_BOT_PERSONAL_ACCESS_TOKEN }}
