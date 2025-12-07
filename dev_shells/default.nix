@@ -3,6 +3,7 @@
   imports = [ inputs.devenv.flakeModule ];
   perSystem =
     {
+      inputs',
       lib,
       pkgs,
       ...
@@ -50,8 +51,11 @@
                 };
                 fmt = {
                   attributes.doc = "Formats and lints files";
-                  commands = "@nix fmt -- {{ paths }}";
-                  parameters = [ "*paths" ];
+                  commands = ''
+                    @find "{{ paths }}" ! -path '*/.*' -exec ${lib.getExe inputs'.snekcheck.packages.default} --fix {} +
+                    @nix fmt -- {{ paths }}
+                  '';
+                  parameters = [ "*paths='.'" ];
                 };
               };
             };

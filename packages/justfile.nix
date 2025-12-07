@@ -114,7 +114,6 @@ let
                   parameters = lib.pipe recipe.parameters [
                     (assertVal lib.isList)
                     (assertVal (lib.all lib.isString))
-                    (lib.sort (x: y: x < y))
                     (lib.concatMapStrings (param: " ${param}"))
                     (assertVal lib.isString)
                   ];
