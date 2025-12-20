@@ -6,8 +6,8 @@
   symlinkJoin,
 }:
 let
-  makeJustfile = modules: justfile.override { inherit just modules; };
-  makeJust =
+  mkJustfile = justfile.withModules;
+  mkJust =
     {
       name ? null,
       justfile ? null,
@@ -21,18 +21,18 @@ let
       nativeBuildInputs = [ makeBinaryWrapper ];
       postBuild = ''
         wrapProgram $out/bin/just \
-          --add-flags "--justfile ${if justfile != null then justfile else makeJustfile [ ]}"
+          --add-flags "--justfile ${if justfile != null then justfile else mkJustfile [ ]}"
       '';
 
       passthru = lib.optionalAttrs (justfile == null) {
-        withJustfile = name: justfile: makeJust { inherit name justfile; };
+        withJustfile = name: justfile: mkJust { inherit name justfile; };
         withModules =
           name: modules:
-          makeJust {
+          mkJust {
             inherit name;
-            justfile = makeJustfile modules;
+            justfile = mkJustfile modules;
           };
       };
     };
 in
-makeJust { }
+mkJust { }
