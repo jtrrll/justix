@@ -78,6 +78,7 @@
 
             packages = [
               inputs'.bun2nix.packages.bun2nix
+              pkgs.vtsls
             ];
 
             git-hooks = {
