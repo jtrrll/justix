@@ -25,7 +25,6 @@ let
       '';
 
       passthru = lib.optionalAttrs (justfile == null) {
-        withJustfile = name: justfile: mkJust { inherit name justfile; };
         withModules =
           name: modules:
           mkJust {

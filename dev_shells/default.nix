@@ -38,8 +38,11 @@
               }
             );
 
+            claude.code.enable = true;
+
             justix = {
               enable = true;
+              mcpServer.enable = true;
               justfile = {
                 recipes = {
                   default = {

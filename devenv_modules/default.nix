@@ -14,6 +14,7 @@
       {
         options.justix = {
           enable = lib.mkEnableOption "justix";
+          mcpServer.enable = lib.mkEnableOption "a justfile MCP server";
 
           package = lib.mkOption {
             type = lib.types.package;
@@ -30,7 +31,7 @@
           justfile = lib.mkOption {
             default = { };
             description = "The justfile to use";
-            type = lib.types.either lib.types.path (lib.types.attrsOf lib.types.anything);
+            type = lib.types.attrsOf lib.types.anything;
           };
         };
 
@@ -38,11 +39,7 @@
           justix.finalPackage =
             let
               name = builtins.baseNameOf config.env.DEVENV_ROOT;
-              justix =
-                if (lib.isPath cfg.justfile) then
-                  cfg.package.withJustfile name cfg.justfile
-                else
-                  cfg.package.withModules name [ cfg.justfile ];
+              justix = cfg.package.withModules name [ cfg.justfile ];
             in
             pkgs.symlinkJoin {
               name = "${name}-justix";
@@ -55,6 +52,18 @@
             };
 
           packages = [ cfg.finalPackage ];
+
+          claude.code.mcpServers = lib.mkIf cfg.mcpServer.enable {
+            justix-mcp = {
+              type = "stdio";
+              command =
+                let
+                  justfilePkg = (getSystem pkgs.stdenv.hostPlatform.system).packages.justfile;
+                  mcpPkg = (getSystem pkgs.stdenv.hostPlatform.system).packages.mcp;
+                in
+                lib.getExe (mcpPkg.withJustfile (justfilePkg.withModules [ cfg.justfile ]));
+            };
+          };
         };
       };
   };
