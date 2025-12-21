@@ -1,7 +1,12 @@
 { inputs, ... }:
 {
   perSystem =
-    { pkgs, system, ... }:
+    {
+      inputs',
+      pkgs,
+      system,
+      ...
+    }:
     {
       packages =
         let
@@ -13,6 +18,9 @@
           };
           justix = pkgs.callPackage ./justix.nix {
             inherit just justfile;
+          };
+          mcp = pkgs.callPackage ./mcp {
+            inherit (inputs'.bun2nix.packages) bun2nix;
           };
         };
     };

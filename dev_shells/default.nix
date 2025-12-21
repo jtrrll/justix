@@ -53,7 +53,7 @@
                   fmt = {
                     attributes.doc = "Formats and lints files";
                     commands = ''
-                      @find "{{ paths }}" ! -path '*/.*' -exec ${lib.getExe inputs'.snekcheck.packages.default} --fix {} +
+                      @find "{{ paths }}" ! -path '*/.*' ! -path '*/node_modules/*' -exec ${lib.getExe inputs'.snekcheck.packages.default} --fix {} +
                       @nix fmt -- {{ paths }}
                     '';
                     parameters = [ "*paths='.'" ];
@@ -62,10 +62,23 @@
               };
             };
 
-            languages.nix = {
-              enable = true;
-              lsp.package = pkgs.nixd;
+            languages = {
+              javascript = {
+                bun = {
+                  enable = true;
+                };
+                enable = true;
+              };
+              nix = {
+                enable = true;
+                lsp.package = pkgs.nixd;
+              };
+              typescript.enable = true;
             };
+
+            packages = [
+              inputs'.bun2nix.packages.bun2nix
+            ];
 
             git-hooks = {
               default_stages = [ "pre-push" ];
