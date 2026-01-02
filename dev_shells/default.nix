@@ -43,7 +43,7 @@
             justix = {
               enable = true;
               mcpServer.enable = true;
-              justfile = {
+              justfile.config = {
                 recipes = {
                   default = {
                     attributes = {
@@ -56,10 +56,26 @@
                   fmt = {
                     attributes.doc = "Formats and lints files";
                     commands = ''
-                      @find "{{ paths }}" ! -path '*/.*' ! -path '*/node_modules/*' -exec ${lib.getExe inputs'.snekcheck.packages.default} --fix {} +
-                      @nix fmt -- {{ paths }}
+                      @files=(); \
+                      for path in {{ paths }}; do \
+                        if [ -f "$path" ]; then \
+                          files+=("$path"); \
+                        elif [ -d "$path" ]; then \
+                          while IFS= read -r -d "" file; do \
+                            files+=("$file"); \
+                          done < <(find "$path" ! -path '*/.*' ! -path '*/node_modules/*' -type f -print0); \
+                        fi; \
+                      done; \
+                      [ ''${#files[@]} -gt 0 ] && ${lib.getExe inputs'.snekcheck.packages.default} --fix "''${files[@]}"
+                      @nix fmt -- {{ paths }} 2>&1
                     '';
                     parameters = [ "*paths='.'" ];
+                  };
+                  test = {
+                    parameters = [
+                      "one"
+                      "+two"
+                    ];
                   };
                 };
               };
@@ -67,9 +83,7 @@
 
             languages = {
               javascript = {
-                bun = {
-                  enable = true;
-                };
+                bun.enable = true;
                 enable = true;
               };
               nix = {

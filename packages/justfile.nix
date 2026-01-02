@@ -11,7 +11,7 @@ let
         inherit modules;
       };
     in
-    runCommand resolved.config.name
+    runCommand "${resolved.config.name}-justfile"
       {
         text = resolved.config.finalContents;
         passAsFile = [ "text" ];
@@ -20,11 +20,21 @@ let
         passthru = {
           inherit (resolved) config options;
           withModules = extraModules: mkJustfile (modules ++ extraModules);
+          structuredContents = lib.importJSON (
+            runCommand "${resolved.config.name}-justfile-dump.json"
+              {
+                text = resolved.config.finalContents;
+                passAsFile = [ "text" ];
+                nativeBuildInputs = [ just ];
+              }
+              ''
+                ${lib.getExe just} --justfile "$textPath" --dump --dump-format json > "$out"
+              ''
+          );
         };
       }
       ''
         mv "$textPath" "$out"
-
         ${lib.getExe just} --justfile "$out" --fmt --unstable --check
       '';
 in
@@ -35,7 +45,7 @@ mkJustfile [
       options = {
         name = lib.mkOption {
           default = "justfile";
-          description = "Name of the `justfile` derivation";
+          description = "Name of the `justfile` derivation.";
           type = lib.types.str;
         };
 
@@ -77,12 +87,12 @@ mkJustfile [
 
         extraConfig = lib.mkOption {
           default = "";
-          description = "Extra text to prepend to the `justfile`";
+          description = "Extra text to prepend to the `justfile`.";
           type = lib.types.lines;
         };
 
         finalContents = lib.mkOption {
-          description = "Resulting `justfile` content.";
+          description = "The final contents of the `justfile`.";
           readOnly = true;
           type = lib.types.str;
         };

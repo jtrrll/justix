@@ -1,7 +1,7 @@
 {
-  lib,
   bun2nix,
-  formats,
+  just,
+  lib,
 }:
 let
   mkMcp =
@@ -23,16 +23,13 @@ let
 
       module = "index.ts";
 
-      postPatch =
-        let
-          justfileConfig = (formats.json { }).generate "justfile-config.json" (
-            if justfile != null then justfile.config else { }
-          );
-        in
-        ''
-          substituteInPlace index.ts \
-            --replace-fail '@JUSTFILE_CONFIG@' '${justfileConfig}'
-        '';
+      postPatch = ''
+        substituteInPlace index.ts \
+          --replace-fail '@JUST_BINARY@' '${lib.getExe just}' \
+          --replace-fail '@JUSTFILE@' '${justfile}'
+      '';
+
+      bunCompileToBytecode = false;
 
       passthru.withJustfile = mkMcp;
     };
