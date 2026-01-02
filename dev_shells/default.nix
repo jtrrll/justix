@@ -71,12 +71,6 @@
                     '';
                     parameters = [ "*paths='.'" ];
                   };
-                  test = {
-                    parameters = [
-                      "one"
-                      "+two"
-                    ];
-                  };
                 };
               };
             };
