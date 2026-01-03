@@ -2,6 +2,10 @@
   description = "Build Justfiles with Nix!";
 
   inputs = {
+    bun2nix = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/bun2nix";
+    };
     devenv = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:cachix/devenv";
