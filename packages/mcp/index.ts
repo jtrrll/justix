@@ -2,10 +2,30 @@ import { FastMCP } from "fastmcp";
 import { Justfile } from "./schema/justfile";
 import { type } from "arktype";
 import { $ } from "bun";
+import { parseArgs } from "util";
 
-const JUST = `@JUST_BINARY@`
-const JUSTFILE = `@JUSTFILE@`
-const justfile = await $`${JUST} --justfile ${JUSTFILE} --dump --dump-format json`.json().then(Justfile.assert)
+const { values } = parseArgs({
+  options: {
+    just: {
+      type: "string",
+      description: "Path to the just executable. If not provided, searches for a valid executable in PATH",
+    },
+  },
+  strict: true,
+  allowPositionals: false,
+});
+
+const JUST = values.just || await (async () => {
+  try {
+    return await $`which just`.text()
+  }
+  catch {
+    console.error("Error: No just executable not found");
+    process.exit(1);
+  }
+})();
+
+const justfile = await $`${JUST} --dump --dump-format json`.json().then(Justfile.assert)
 
 const server = new FastMCP({
   name: "justix-mcp",
@@ -43,7 +63,7 @@ Object.entries(justfile.recipes || {}).filter(([_, recipe]) => !recipe.private).
         return [...acc, value]
       }, []);
 
-      return await $`${JUST} --justfile ${JUSTFILE} ${name} ${params.join(" ")}`.text()
+      return await $`${JUST} ${name} ${params.join(" ")}`.text()
     },
   })
 })

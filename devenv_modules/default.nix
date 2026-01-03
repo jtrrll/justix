@@ -53,13 +53,7 @@
             claude.code.mcpServers = lib.mkIf cfg.mcpServer.enable {
               justix-mcp = {
                 type = "stdio";
-                command =
-                  let
-                    mcpPkg = (getSystem pkgs.stdenv.hostPlatform.system).packages.mcp.override {
-                      just = cfg.just.package;
-                    };
-                  in
-                  lib.getExe (mcpPkg.withJustfile "${config.devenv.root}/.justfile");
+                command = lib.getExe (getSystem pkgs.stdenv.hostPlatform.system).packages.mcp;
               };
             };
           })
