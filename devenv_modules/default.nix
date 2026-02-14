@@ -14,7 +14,6 @@
       {
         options.justix = {
           enable = lib.mkEnableOption "justix";
-          mcpServer.enable = lib.mkEnableOption "a justfile MCP server";
 
           just.package = lib.mkPackageOption pkgs "just" { };
 
@@ -49,13 +48,6 @@
             enterShell = ''
               ln --force --symbolic ${cfg.justfile.finalPackage} ${config.devenv.root}/.justfile
             '';
-
-            claude.code.mcpServers = lib.mkIf cfg.mcpServer.enable {
-              justix-mcp = {
-                type = "stdio";
-                command = lib.getExe (getSystem pkgs.stdenv.hostPlatform.system).packages.mcp;
-              };
-            };
           })
 
           (lib.mkIf (!cfg.enable) {
