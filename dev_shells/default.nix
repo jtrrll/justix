@@ -42,7 +42,6 @@
 
             justix = {
               enable = true;
-              mcpServer.enable = true;
               justfile.config = {
                 recipes = {
                   default = {
