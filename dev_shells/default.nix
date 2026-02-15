@@ -1,6 +1,7 @@
 { inputs, self, ... }:
 {
   imports = [ inputs.devenv.flakeModule ];
+
   perSystem =
     {
       inputs',
@@ -9,11 +10,10 @@
     }:
     {
       devenv = {
-        modules = [
+        modules = (lib.attrValues self.modules.devenv) ++ [
           {
             containers = lib.mkForce { }; # Workaround to remove containers from flake checks.
           }
-          self.devenvModules.default
         ];
         shells.default =
           { lib, pkgs, ... }:
@@ -42,7 +42,7 @@
 
             justix = {
               enable = true;
-              justfile.config = {
+              config = {
                 recipes = {
                   default = {
                     attributes = {
@@ -62,7 +62,7 @@
                         elif [ -d "$path" ]; then \
                           while IFS= read -r -d "" file; do \
                             files+=("$file"); \
-                          done < <(find "$path" ! -path '*/.*' ! -path '*/node_modules/*' -type f -print0); \
+                          done < <(find "$path" ! -path '*/.*' -type f -print0); \
                         fi; \
                       done; \
                       [ ''${#files[@]} -gt 0 ] && ${lib.getExe inputs'.snekcheck.packages.default} --fix "''${files[@]}"
@@ -74,22 +74,10 @@
               };
             };
 
-            languages = {
-              javascript = {
-                bun.enable = true;
-                enable = true;
-              };
-              nix = {
-                enable = true;
-                lsp.package = pkgs.nixd;
-              };
-              typescript.enable = true;
+            languages.nix = {
+              enable = true;
+              lsp.package = pkgs.nixd;
             };
-
-            packages = [
-              inputs'.bun2nix.packages.bun2nix
-              pkgs.vtsls
-            ];
 
             git-hooks = {
               default_stages = [ "pre-push" ];
