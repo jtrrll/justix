@@ -5,7 +5,7 @@ on:
   push:
     branches: ["main"]
   schedule:
-    - cron: '0 06 * * MON'
+    - cron: "0 06 * * MON"
   workflow_dispatch:
 concurrency:
   cancel-in-progress: true
@@ -17,7 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: DeterminateSystems/nix-installer-action@v21
-      - uses: DeterminateSystems/magic-nix-cache-action@v13
       - uses: DeterminateSystems/flake-checker-action@v12
       - name: Check flake
         run: nix flake check --impure
