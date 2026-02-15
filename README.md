@@ -6,4 +6,4 @@
 ![License](https://img.shields.io/github/license/jtrrll/justix?label=license&logo=googledocs&logoColor=white)
 <!-- markdownlint-enable MD013 -->
 
-Build Justfiles with Nix!
+Build justfiles with Nix!

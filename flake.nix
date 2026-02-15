@@ -1,18 +1,18 @@
 {
-  description = "Build Justfiles with Nix!";
+  description = "Build justfiles with Nix!";
 
   inputs = {
-    bun2nix = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      url = "github:nix-community/bun2nix";
-    };
+    ### Development dependencies ###
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     devenv = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:cachix/devenv";
     };
-    flake-parts.url = "github:hercules-ci/flake-parts";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    nixpkgs-just.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts = {
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+      url = "github:hercules-ci/flake-parts";
+    };
+    import-tree.url = "github:vic/import-tree";
     snekcheck = {
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:jtrrll/snekcheck";
@@ -21,17 +21,35 @@
       inputs.nixpkgs.follows = "nixpkgs";
       url = "github:numtide/treefmt-nix";
     };
+
+    ### Build dependencies ###
+    nixpkgs-just.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
   outputs =
-    { flake-parts, ... }@inputs:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        ./dev_shells
-        ./devenv_modules
-        ./formatter
-        ./packages
-      ];
-      systems = inputs.nixpkgs.lib.systems.flakeExposed;
-    };
+    {
+      flake-parts,
+      import-tree,
+      nixpkgs,
+      ...
+    }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } (
+      let
+        modules-tree = nixpkgs.lib.pipe import-tree [
+          (it: it.addPath ./modules)
+          # Matches top-level `*.nix` files and `default.nix` files that are one level deep.
+          (it: it.match "^/[^/]+\.nix$|^/[^/]+/default\.nix$")
+        ];
+      in
+      {
+        imports = [
+          ./dev_shells
+          modules-tree.result
+        ];
+
+        flake.lib.modules-tree = modules-tree;
+
+        systems = nixpkgs.lib.systems.flakeExposed;
+      }
+    );
 }
